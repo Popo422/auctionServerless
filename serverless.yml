@@ -1,0 +1,46 @@
+service: auctionManagement
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  memorySize: 256
+  stage: ${opt:stage, 'dev'}
+  region: ap-northeast-1
+  environment:
+    AUCTIONS_TABLE: ${self:custom.AuctionsTable.name}
+  iamRoleStatements:
+    - ${file(iam/auctionsTableIAM.yml):AuctionsTableIAM}
+functions:
+  createAuction:
+    handler: src/handlers/getAuctions.handler
+    events:
+      - httpApi:
+          path: /auction
+          method: POST
+  getAuctions:
+    handler: src/handlers/getAuctions.handler
+    events:
+      - httpApi:
+          path: /auction
+          method: GET
+  getAuction:
+    handler: src/handlers/getAuction.handler
+    events:
+      - httpApi:
+          path: /auction/{id}
+          method: GET
+  placeBid:
+    handler: src/handlers/placeBid.handler
+    events:
+      - httpApi:
+          path: /auction/{id}/bid
+          method: PATCH
+resources:
+  Resources:
+    AuctionsTable: ${file(resources/auctionsTable.yml):AuctionsTable}
+
+custom:
+  AuctionsTable:
+    name: !Ref AuctionsTable
+    arn: !GetAtt AuctionsTable.Arn
