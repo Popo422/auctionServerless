@@ -2,7 +2,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 import crypto from "crypto";
 import createHttpError from "http-errors";
-import commonMiddleware from "../lib/commonMiddleware";
+import commonMiddleware from "../lib/commonMiddleware.js";
 const createAuction = async (event) => {
   try {
     const client = new DynamoDBClient({});

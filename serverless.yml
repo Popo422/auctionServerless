@@ -13,7 +13,7 @@ provider:
     - ${file(iam/auctionsTableIAM.yml):AuctionsTableIAM}
 functions:
   createAuction:
-    handler: src/handlers/getAuctions.handler
+    handler: src/handlers/createAuction.handler
     events:
       - httpApi:
           path: /auction

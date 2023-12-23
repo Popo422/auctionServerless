@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import createHttpError from "http-errors";
-import commonMiddleware from "../lib/commonMiddleware";
+import commonMiddleware from "../lib/commonMiddleware.js";
 
 const getAuctions = async (event) => {
   try {
