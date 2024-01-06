@@ -3,11 +3,17 @@ import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import createHttpError from "http-errors";
 import commonMiddleware from "../lib/commonMiddleware.js";
 import { getAuctionById } from "./getAuction.js";
+import validator from "@middy/validator";
+import { schema } from "../lib/schemas/placeBidSchema.js";
 const placeBid = async (event) => {
+  console.log(JSON.stringify(event))
   try {
     const { id } = event.pathParameters;
     const { amount } = event.body;
     const auction = await getAuctionById(id);
+    if (auction.status !== "OPEN") {
+      throw new createHttpError.Forbidden(` You cannot place a bid on a closed auctions`);
+    }
     if (amount <= auction.highestBid.amount) {
       throw new createHttpError.Forbidden(`Your bid must be higher than ${auction.highestBid.amount}!`);
     }
@@ -35,4 +41,12 @@ const placeBid = async (event) => {
   }
 };
 
-export const handler = commonMiddleware(placeBid);
+export const handler = commonMiddleware(placeBid).use(
+  validator({
+    eventSchema: schema,
+    ajvOptions: {
+      useDefaults: true,
+      strict: false,
+    },
+  })
+);

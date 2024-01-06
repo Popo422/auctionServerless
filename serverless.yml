@@ -6,6 +6,12 @@ provider:
   runtime: nodejs18.x
   memorySize: 256
   stage: ${opt:stage, 'dev'}
+  httpApi:
+    cors: true
+    authorizers:
+      auth:
+        type: request
+        functionArn: ${self:custom.authorizer}
   region: ap-northeast-1
   environment:
     AUCTIONS_TABLE: ${self:custom.AuctionsTable.name}
@@ -18,29 +24,43 @@ functions:
       - httpApi:
           path: /auction
           method: POST
+          authorizer:
+            name: auth
   getAuctions:
     handler: src/handlers/getAuctions.handler
     events:
       - httpApi:
           path: /auction
           method: GET
+          authorizer:
+            name: auth
   getAuction:
     handler: src/handlers/getAuction.handler
     events:
       - httpApi:
           path: /auction/{id}
           method: GET
+          authorizer:
+            name: auth
   placeBid:
     handler: src/handlers/placeBid.handler
     events:
       - httpApi:
           path: /auction/{id}/bid
           method: PATCH
+          authorizer:
+            name: auth
+  processAuctions:
+    handler: src/handlers/processAuctions.handler
+    # events:
+    #   - schedule: rate(1 minute)
+
 resources:
   Resources:
     AuctionsTable: ${file(resources/auctionsTable.yml):AuctionsTable}
 
 custom:
+  authorizer: arn:aws:lambda:${aws:region}:${aws:accountId}:function:serverless-auth0-authorizer-${self:provider.stage}-authLambda
   AuctionsTable:
     name: !Ref AuctionsTable
     arn: !GetAtt AuctionsTable.Arn
